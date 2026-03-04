@@ -1,0 +1,34 @@
+# 💀 BLUETOOTH EXTERMINATOR V3.1
+> **Advanced Bluetooth Auditing & Stress Testing Suite** > *Desarrollado por: alespdev*
+
+---
+
+## 📖 Descripción
+**Bluetooth Exterminator** es una potente suite de herramientas escrita en Bash para sistemas Linux. Utiliza el stack de **BlueZ** para realizar pruebas de estrés, auditoría de protocolos y saturación de radiofrecuencia en dispositivos Bluetooth. 
+
+Esta herramienta ha sido diseñada con una interfaz ASCII minimalista para maximizar la compatibilidad y el rendimiento en entornos de terminal, permitiendo una gestión dinámica de interfaces de hardware.
+
+---
+
+## ⚡ Métodos de Ataque
+
+| Método | Descripción Técnica | Impacto Esperado |
+| :--- | :--- | :--- |
+| **Broadcast Jamming** | Envía comandos de inundación HCI y ráfagas l2ping al espectro global (`00:00:00...`). | Saturación del canal de radio y desconexión de dispositivos cercanos. |
+| **Targeted Jamming** | Ataque dirigido mediante inundación de paquetes L2CAP de gran tamaño (640 bytes) a una MAC específica. | Congelamiento de servicios y lag en el dispositivo objetivo. |
+| **GATT/SDP Stress** | Genera identidades aleatorias para solicitar repetidamente el Service Discovery Protocol (SDP). | Saturación del procesador del dispositivo Bluetooth al intentar enumerar servicios inexistentes. |
+
+---
+
+## 🛠️ Requisitos del Sistema
+
+El script requiere que el sistema tenga instalado el paquete `bluez-utils` y `hcitool`.
+
+### Dependencias:
+- **BlueZ Stack:** `hcitool`, `hciconfig`, `l2ping`, `sdptool`.
+- **Privilegios:** Root (sudo) para manipulación de interfaces HCI.
+- **Terminal:** Compatible con secuencias de escape ANSI (Zorin OS, Ubuntu, Kali, etc.).
+
+```bash
+# Instalación rápida de dependencias en Debian/Ubuntu/Zorin
+sudo apt update && sudo apt install bluez bluez-tools -y
