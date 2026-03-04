@@ -1,4 +1,5 @@
 #!/bin/bash
+## Created by alespdev
 
 echo -ne "\e[8;30;60t"
 
