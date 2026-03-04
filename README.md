@@ -1,4 +1,4 @@
-# 💀 BLUETOOTH EXTERMINATOR V3.1
+# 💀 BLUETOOTH EXTERMINATOR V3.1.1
 > **Advanced Bluetooth Auditing & Stress Testing Suite** > *Desarrollado por: alespdev*
 
 ---
