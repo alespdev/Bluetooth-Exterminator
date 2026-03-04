@@ -6,6 +6,7 @@
 ## 📖 Descripción
 **Bluetooth Exterminator** es una potente suite de herramientas escrita en Bash para sistemas Linux. Utiliza el stack de **BlueZ** para realizar pruebas de estrés, auditoría de protocolos y saturación de radiofrecuencia en dispositivos Bluetooth. 
 
+**Se recomienda usar adaptador BT externo.**
 ---
 
 ## ⚡ Métodos de Ataque
