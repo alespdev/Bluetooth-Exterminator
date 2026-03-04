@@ -21,13 +21,19 @@
 
 ## 🛠️ Requisitos del Sistema
 
-El script requiere que el sistema tenga instalado el paquete `bluez-utils` y `hcitool`.
+El script requiere que el sistema tenga instalado el paquete `bluez-utils` y las herramientas nativas de Bluetooth.
 
 ### Dependencias:
 - **BlueZ Stack:** `hcitool`, `hciconfig`, `l2ping`, `sdptool`.
-- **Privilegios:** Root (sudo) para manipulación de interfaces HCI.
-- **Terminal:** Compatible con secuencias de escape ANSI (Zorin OS, Ubuntu, Kali, etc.).
+- **Privilegios:** Root (sudo) obligatorio para la manipulación de interfaces HCI.
+- **Terminal:** Compatible con secuencias de escape ANSI (Zorin OS, Ubuntu, Kali, Parrot, etc.).
 
 ```bash
-# Instalación rápida de dependencias en Debian/Ubuntu/Zorin
+# 1. Instalación de dependencias
 sudo apt update && sudo apt install bluez bluez-tools -y
+
+# 2. Configuración de permisos de ejecución
+chmod +x exterminator.sh
+
+# 3. Ejecución de la suite
+sudo ./exterminator.sh
